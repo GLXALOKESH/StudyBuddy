@@ -4,17 +4,18 @@ import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.js";
 
 const verifyToken = asyncHandler(async (req,_,next)=>{
+  console.log(req.cookies)
 
   try {
       const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
   
       if(!token){
-          throw new ApiError(500,"No accessToken found")
+          throw new ApiError(401,"No accessToken found")
       }
   
-      const decoded =  jwt.decode(token,process.env.ACCESS_TOKEN_SECRET)
+      const decoded =  jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
   
-      const user = User.findById(decoded?._id).select("-password -refreshToken")
+      const user = await  User.findById(decoded?._id).select("-password -refreshToken")
   
       if (!user) {
             
@@ -23,7 +24,7 @@ const verifyToken = asyncHandler(async (req,_,next)=>{
       req.user = user
       next()    
   } catch (error) {
-        throw new ApiError(500,error?.messege || "invalid Access Token")
+        throw new ApiError(401,error?.message || "Invalid Access Token")
   }
 })
 

@@ -8,14 +8,16 @@ import { decode } from "jsonwebtoken";
 
 const getRefreshAndAccessToken = async (userid) => {
   try {
-    const user =await  User.findById(userid);
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    const user = await  User.findById(userid);
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
 
     await user.save({ validateBeforeSave: false });
-
+    // console.log("refreshToken", refreshToken);
+    // console.log("accessToken", accessToken);
+    
     return { accessToken, refreshToken };
   } catch (error) {
     throw new ApiError(
@@ -82,14 +84,17 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Password is incorrect");
   }
 
-  const { accessToken, refreshToken } = getRefreshAndAccessToken(user._id);
+  const { accessToken, refreshToken } = await  getRefreshAndAccessToken(user._id);
+  if (!accessToken || !refreshToken) {
+    throw new ApiError(500, "Something went wrong while generating tokens");
+  }
 
   const loggedinUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV !== "development",
   };
 
   return res

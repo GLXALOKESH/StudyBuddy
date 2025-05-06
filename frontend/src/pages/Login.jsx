@@ -22,11 +22,14 @@ export default function LoginPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       if (response.ok) {
         // Login successful, redirect to dashboard page
         navigate("/dashboard");
+        // console.log(response.json());
+        
       } else {
         // Login failed, display error message
         const data = await response.json();

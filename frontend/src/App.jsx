@@ -5,6 +5,8 @@ import LandingPage from './pages/Landing'
 import LoginPage from '@/pages/Login.jsx'
 import RegisterPage from '@/pages/Register.jsx'
 import Dashboard from './pages/Dashboard'
+import Upload from './pages/Upload.jsx'
+import Notes from './pages/Notes.jsx'
 
 
 import { createBrowserRouter, RouterProvider } from 'react-router'
@@ -25,6 +27,14 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
   {
     path: "/dashboard",
     element: <Dashboard />,
+  },
+  {
+    path: "/upload",
+    element: <Upload />,
+  },
+  {
+    path: "/notes",
+    element: <Notes />,
   },
 ])
 function App() {
