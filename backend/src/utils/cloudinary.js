@@ -29,7 +29,32 @@ const uploadOnCloudinary = async (localFilePath) =>{
     }
 }
 
-export {uploadOnCloudinary}
+const deleteFromCloudinary = async (publicId) =>{
+    try{
+        console.log("Deleting from Cloudinary:", publicId);
+        
+        if(!publicId) {
+            console.log("No public id provided");
+            return null
+        }
+        const responce = await cloudinary.uploader.destroy(publicId, { invalidate: true })
+        console.log("Cloudinary delete response:", responce);
+
+        if (responce.result === 'not found') {
+            console.error(`Cloudinary: Public ID ${publicId} not found`);
+            throw new Error(`Cloudinary: Public ID ${publicId} not found`);
+        }
+        
+        return responce
+    } catch (error) {
+        console.error("Cloudinary delete error:", error.message, error.http_code);
+        throw new Error(`Cloudinary delete error: ${error.message} ${error.http_code}`);
+    }
+}
+
+
+
+export {uploadOnCloudinary, deleteFromCloudinary}
 
 
 

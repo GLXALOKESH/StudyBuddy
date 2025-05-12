@@ -7,6 +7,7 @@ import RegisterPage from '@/pages/Register.jsx'
 import Dashboard from './pages/Dashboard'
 import Upload from './pages/Upload.jsx'
 import Notes from './pages/Notes.jsx'
+import SummaryPage from './pages/Summery'
 
 
 import { createBrowserRouter, RouterProvider } from 'react-router'
@@ -36,6 +37,10 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
     path: "/notes",
     element: <Notes />,
   },
+  {
+    path: "/summaries",
+    element: <SummaryPage />,
+  }, 
 ])
 function App() {
 

@@ -38,6 +38,18 @@ const userSchema = mongoose.Schema(
     xp: { type: Number, default: 0 },
     streak: { type: Number, default: 0 },
     tier: { type: String, enum: ['free', 'pro', 'team'], default: 'free' },  
+    role: { type: String, enum: ['admin', 'user'], default: 'user' },
+    subjects: [
+      {
+        type:String
+      },
+    ],
+    notes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Note",
+      },
+    ],
   },
   { timestamps: true }
 );
