@@ -44,6 +44,17 @@ const userSchema = mongoose.Schema(
         type:String
       },
     ],
+    summerySubjects: [
+      {
+        type: String,
+      },
+    ],
+    summaries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Summary",
+      },
+    ],
     notes: [
       {
         type: mongoose.Schema.Types.ObjectId,

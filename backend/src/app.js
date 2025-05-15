@@ -22,10 +22,12 @@ app.use(cookieParser())
 //router import 
 
 import userRouter from "./routes/user.route.js"
+import notesRouter from "./routes/notes.route.js"
 
 //router decleration
 
 app.use("/api/v1/users", userRouter)
+app.use("/api/v1/notes", notesRouter)
 
 
 

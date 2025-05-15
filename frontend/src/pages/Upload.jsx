@@ -62,7 +62,7 @@ const UploadPage = () => {
     console.log("Uploading file with metadata:", formData);
 
     try {
-      const response = await fetch(`${url}/api/v1/users/upload-notes`, {
+      const response = await fetch(`${url}/api/v1/notes/upload-notes`, {
         method: "POST",
         body: formData,
         credentials: "include",

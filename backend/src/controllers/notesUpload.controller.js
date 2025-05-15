@@ -150,7 +150,7 @@ const deleteSubject = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponce(200, null, "Subject deleted successfully"));
 });
 
-
+  
 
 
 export { uploadNotes, getNotes, getsubjects, deleteNote, deleteSubject };

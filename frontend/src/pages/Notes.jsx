@@ -35,7 +35,7 @@ const NotesPage = () => {
   }
   const fetchNotes = async () => {
       try {
-        const response = await fetch(`${url}/api/v1/users/get-notes`, {
+        const response = await fetch(`${url}/api/v1/notes/get-notes`, {
           method: "POST",
           credentials: "include", // equivalent to axios's withCredentials: true
           headers: {
@@ -66,7 +66,7 @@ useEffect(() => {
   
   const fetchSubjects = async () =>{
     try {
-      const response = await axios.post(`${url}/api/v1/users/get-subjects`, {}, { withCredentials: true });
+      const response = await axios.post(`${url}/api/v1/notes/get-subjects`, {}, { withCredentials: true });
       if(!response.data.success){
         throw new Error("Failed to fetch subjects")
       }
@@ -84,7 +84,7 @@ useEffect(() => {
   const handleBack = () => setSelectedSubject(null);
   const handleDelete = async (subject) => {
     try {
-      const response = await axios.post(`${url}/api/v1/users/delete-subject`, { 
+      const response = await axios.post(`${url}/api/v1/notes/delete-subject`, { 
         subject:subject 
       }, { withCredentials: true });
       if(!response.data.success){
@@ -103,7 +103,7 @@ useEffect(() => {
     e.stopPropagation();
     const noteId = e.target.closest("[data-id]").getAttribute("data-id");
     console.log(noteId);
-    const response = axios.post(`${url}/api/v1/users/delete-note`,{
+    const response = axios.post(`${url}/api/v1/notes/delete-note`,{
       noteId: noteId
     }, { withCredentials: true })
     if(!response.data.success){
