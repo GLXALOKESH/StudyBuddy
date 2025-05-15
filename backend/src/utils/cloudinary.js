@@ -53,8 +53,38 @@ const deleteFromCloudinary = async (publicId) =>{
 }
 
 
+function extractPublicId(cloudinaryUrl) {
+  try {
+    const pathname = new URL(cloudinaryUrl).pathname; // e.g. /dwb1jtrym/image/upload/v1746897239/filename.pdf
+    const parts = pathname.split('/');
 
-export {uploadOnCloudinary, deleteFromCloudinary}
+    const uploadIndex = parts.indexOf('upload');
+    if (uploadIndex === -1) {
+      throw new Error("Invalid Cloudinary URL: 'upload' not found");
+    }
+
+    // All parts after "upload"
+    const afterUpload = parts.slice(uploadIndex + 1);
+
+    // Remove version if it starts with "v" and a number
+    if (/^v\d+$/.test(afterUpload[0])) {
+      afterUpload.shift(); // remove version
+    }
+
+    const filenameWithExt = afterUpload.join('/'); // now just the file path
+    const lastDot = filenameWithExt.lastIndexOf('.');
+    return lastDot !== -1
+      ? filenameWithExt.substring(0, lastDot)
+      : filenameWithExt;
+
+  } catch (err) {
+    console.error("Error extracting public ID:", err.message);
+    return null;
+  }
+}
+
+
+export {uploadOnCloudinary, deleteFromCloudinary, extractPublicId}
 
 
 

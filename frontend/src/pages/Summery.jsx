@@ -10,13 +10,15 @@ const url = "http://localhost:3000";
 const SummaryPage = () => {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [subjects, setSubjects] = useState([]);
+  const [summerySubject, setsummerySubject] = useState([])
   const [summaries, setSummaries] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [notes, setNotes] = useState([])
   const [formData, setFormData] = useState({
-    file: null,
     summaryName: "",
     selectedSubject: "",
-    newSubject: "",
+    selectedNote: "",
+    summeryLength:""
   });
 
   const convertToDownloadableUrl = (url) => {
@@ -25,7 +27,14 @@ const SummaryPage = () => {
   };
 
   useEffect(() => {
-    axios.post(`${url}/api/v1/users/get-subjects`, {}, { withCredentials: true })
+    axios.post(`${url}/api/v1/summery/get-summery-subjects`, {}, { withCredentials: true })
+      .then(res => {
+        if (res.data.success) setsummerySubject(res.data.data);
+      }).catch(err => console.error("Subject fetch error:", err));
+  }, []);
+
+useEffect(() => {
+    axios.post(`${url}/api/v1/notes/get-subjects`, {}, { withCredentials: true })
       .then(res => {
         if (res.data.success) setSubjects(res.data.data);
       }).catch(err => console.error("Subject fetch error:", err));
@@ -43,12 +52,34 @@ const SummaryPage = () => {
     await axios.post(`${url}/api/v1/users/delete-summary`, { summaryId: id }, { withCredentials: true });
     setSummaries(prev => prev.filter(s => s._id !== id));
   };
+   useEffect(() => {
+    console.log("changed");
+    
+    if (formData.selectedSubject !== "") {
+      console.log("fetching notes");
+      
+      handleNotesFetch();
+    }
+    else {
+      setNotes([]); 
+    }
+  }, [formData.selectedSubject]);
+  
+  const handleNotesFetch = async () => {
+    const subject = formData.selectedSubject
+    const res = await axios.post(`${url}/api/v1/notes/get-notes`, { subject }, { withCredentials: true });
+    if (res.data.success) {
+      setNotes(res.data.data);  
+    }
+  }
+
 
   const handleUpload = async () => {
     const form = new FormData();
-    form.append("file", formData.file);
     form.append("summaryName", formData.summaryName);
-    form.append("subject", formData.selectedSubject || formData.newSubject);
+    form.append("subject", formData.selectedSubject);
+    form.append("noteId", formData.selectedNote);
+    form.append("summeryLength", formData.summeryLength);
     const res = await axios.post(`${url}/api/v1/users/upload-summary`, form, { withCredentials: true });
     setShowUploadModal(false);
     if (selectedSubject) setSelectedSubject(null); // refresh view
@@ -56,7 +87,7 @@ const SummaryPage = () => {
 
   const renderFolders = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {subjects.map((subj, i) => (
+      {summerySubject.map((subj, i) => (
         <Card key={i} onClick={() => setSelectedSubject(subj)} className="cursor-pointer hover:shadow-md">
           <CardContent className="flex justify-between p-6 items-center">
             <div className="flex items-center space-x-4">
@@ -116,12 +147,28 @@ const SummaryPage = () => {
             <div className="bg-white rounded-lg p-6 w-[90%] md:w-[400px] space-y-4 shadow-lg z-[50]">
               <h2 className="text-xl font-semibold mb-4">Upload New Summary</h2>
               <input type="text" placeholder="Summary Name" value={formData.summaryName} onChange={e => setFormData({ ...formData, summaryName: e.target.value })} className="w-full border rounded p-2" />
-              <select className="w-full border p-2 rounded" onChange={e => setFormData({ ...formData, selectedSubject: e.target.value })}>
+              <select className="w-full border p-2 rounded cursor-pointer" onChange={e => setFormData({ ...formData, selectedSubject: e.target.value })}>
                 <option value="">Select Subject</option>
                 {subjects.map((s, i) => <option key={i} value={s}>{s}</option>)}
               </select>
-              <input type="text" placeholder="Or Create New Subject" value={formData.newSubject} onChange={e => setFormData({ ...formData, newSubject: e.target.value })} className="w-full border p-2 rounded" />
-              <input type="file" onChange={e => setFormData({ ...formData, file: e.target.files[0] })} className="w-full" />
+              <select 
+              disabled={!(formData.selectedSubject !== "")}
+              style={{ opacity: formData.selectedSubject !== "" ? 1 : 0.5 , cursor: formData.selectedSubject !== "" ? "pointer" : "not-allowed"}}
+              className="w-full border p-2 rounded" onChange={e => setFormData({ ...formData, selectedNote: e.target.value })}>
+                <option value="">Select Note</option>
+                {notes.map((s, i) => <option key={i} value={s._id}>{s.fileName}</option>)}
+              </select> 
+              <select 
+              disabled={!(formData.selectedNote !== "")}
+              style={{ opacity: formData.selectedNote !== "" ? 1 : 0.5 , cursor: formData.selectedNote !== "" ? "pointer" : "not-allowed"}}
+              className="w-full border p-2 rounded"
+               onChange={e => setFormData({ ...formData, selectedNote: e.target.value }) }> 
+                <option value="">Select Length</option>
+                <option value="short">Short(50-100 words)</option>
+                <option value="medium">Medium(100-200 words)</option>
+                <option value="large">Large(200-500 words)</option>
+
+              </select> 
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setShowUploadModal(false)}>Cancel</Button>
                 <Button onClick={handleUpload}>Summarize</Button>

@@ -1,39 +1,39 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponce } from "../utils/ApiResponce.js";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteFromCloudinary, extractPublicId } from "../utils/cloudinary.js";
 import { Note } from "../models/noteUpload.models.js";
 import { User } from "../models/user.models.js";
 import e from "express";
-function extractPublicId(cloudinaryUrl) {
-  try {
-    const pathname = new URL(cloudinaryUrl).pathname; // e.g. /dwb1jtrym/image/upload/v1746897239/filename.pdf
-    const parts = pathname.split('/');
+// function extractPublicId(cloudinaryUrl) {
+//   try {
+//     const pathname = new URL(cloudinaryUrl).pathname; // e.g. /dwb1jtrym/image/upload/v1746897239/filename.pdf
+//     const parts = pathname.split('/');
 
-    const uploadIndex = parts.indexOf('upload');
-    if (uploadIndex === -1) {
-      throw new Error("Invalid Cloudinary URL: 'upload' not found");
-    }
+//     const uploadIndex = parts.indexOf('upload');
+//     if (uploadIndex === -1) {
+//       throw new Error("Invalid Cloudinary URL: 'upload' not found");
+//     }
 
-    // All parts after "upload"
-    const afterUpload = parts.slice(uploadIndex + 1);
+//     // All parts after "upload"
+//     const afterUpload = parts.slice(uploadIndex + 1);
 
-    // Remove version if it starts with "v" and a number
-    if (/^v\d+$/.test(afterUpload[0])) {
-      afterUpload.shift(); // remove version
-    }
+//     // Remove version if it starts with "v" and a number
+//     if (/^v\d+$/.test(afterUpload[0])) {
+//       afterUpload.shift(); // remove version
+//     }
 
-    const filenameWithExt = afterUpload.join('/'); // now just the file path
-    const lastDot = filenameWithExt.lastIndexOf('.');
-    return lastDot !== -1
-      ? filenameWithExt.substring(0, lastDot)
-      : filenameWithExt;
+//     const filenameWithExt = afterUpload.join('/'); // now just the file path
+//     const lastDot = filenameWithExt.lastIndexOf('.');
+//     return lastDot !== -1
+//       ? filenameWithExt.substring(0, lastDot)
+//       : filenameWithExt;
 
-  } catch (err) {
-    console.error("Error extracting public ID:", err.message);
-    return null;
-  }
-}
+//   } catch (err) {
+//     console.error("Error extracting public ID:", err.message);
+//     return null;
+//   }
+// }
 
 const uploadNotes = asyncHandler(async (req, res) => {
   if (!req.file) {
@@ -116,8 +116,8 @@ const deleteNote = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Public ID not found");
   }
   await deleteFromCloudinary(publicId);
-  await Note.deleteOne({ _id: req.body.noteId });
-  Note.save();
+await Note.findByIdAndDelete(req.body.noteId);
+ await User.updateMany({}, { $pull: { notes: req.body.noteId } });  
   res.status(200).json(new ApiResponce(200, null, "Note deleted successfully"));
 }); 
 
