@@ -2,6 +2,10 @@ import {v2 as cloudinary} from "cloudinary"
 import fs from "fs"
 import { DOTENV_PATH } from "../constants.js";
 import { log } from "console";
+import path from "path";
+import axios from "axios";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 cloudinary.config({
     cloud_name:process.env.CLOUDINARY_NAME,
@@ -83,8 +87,40 @@ function extractPublicId(cloudinaryUrl) {
   }
 }
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const downloadFromCloudinary = async (cloudinaryUrl,filename) => {
+    const localPath = path.join(__dirname,"../../public/temp",filename)
+    const writer = fs.createWriteStream(localPath);
+    const responce = await axios({
+        url:cloudinaryUrl,
+        method:"GET",
+        responseType:"stream"
+    })
 
-export {uploadOnCloudinary, deleteFromCloudinary, extractPublicId}
+    return new Promise((resolve,reject) =>{
+        responce.data.pipe(writer)
+        let error = null
+        writer.on("error", err =>{
+            error = err
+            writer.close()
+            reject(err)
+        })
+        writer.on("close", () => {
+            if(!error){
+                resolve(localPath)
+            }else{
+                reject(error)
+            }
+        })
+    })
+}
+
+const extractFilenameFromUrl = (cloudinaryUrl) => {
+  return path.basename(new URL(cloudinaryUrl).pathname); // returns 'abc.pdf'
+};
+
+export {uploadOnCloudinary, deleteFromCloudinary, extractPublicId, downloadFromCloudinary,extractFilenameFromUrl}
 
 
 

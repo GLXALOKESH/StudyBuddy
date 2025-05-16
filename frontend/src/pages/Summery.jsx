@@ -75,15 +75,27 @@ useEffect(() => {
 
 
   const handleUpload = async () => {
-    const form = new FormData();
-    form.append("summaryName", formData.summaryName);
-    form.append("subject", formData.selectedSubject);
-    form.append("noteId", formData.selectedNote);
-    form.append("summeryLength", formData.summeryLength);
-    const res = await axios.post(`${url}/api/v1/users/upload-summary`, form, { withCredentials: true });
+  const payload = {
+    summaryName: formData.summaryName,
+    subject: formData.selectedSubject,
+    noteId: formData.selectedNote,
+    summeryLength: formData.summeryLength,
+  };
+
+  try {
+    const res = await axios.post(
+      `${url}/api/v1/summery/summerize`,
+      payload,
+      { withCredentials: true }
+    );
+console.log(res.data);
+
     setShowUploadModal(false);
     if (selectedSubject) setSelectedSubject(null); // refresh view
-  };
+  } catch (error) {
+    console.error("Upload failed:", error);
+  }
+};
 
   const renderFolders = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -162,11 +174,11 @@ useEffect(() => {
               disabled={!(formData.selectedNote !== "")}
               style={{ opacity: formData.selectedNote !== "" ? 1 : 0.5 , cursor: formData.selectedNote !== "" ? "pointer" : "not-allowed"}}
               className="w-full border p-2 rounded"
-               onChange={e => setFormData({ ...formData, selectedNote: e.target.value }) }> 
+               onChange={e => setFormData({ ...formData, summeryLength: e.target.value }) }> 
                 <option value="">Select Length</option>
-                <option value="short">Short(50-100 words)</option>
-                <option value="medium">Medium(100-200 words)</option>
-                <option value="large">Large(200-500 words)</option>
+                <option value="short">Short(14-15% of note)</option>
+                <option value="medium">Medium(22-25% of note)</option>
+                <option value="large">Large(30-32% of note)</option>
 
               </select> 
               <div className="flex justify-end space-x-2">
