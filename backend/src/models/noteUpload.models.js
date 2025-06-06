@@ -9,7 +9,7 @@ const NoteSchema = new mongoose.Schema({
     uploadDate: { type: Date, default: Date.now },
     previewText: {type : String, default: "None"},
     summaryIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Summary' }],
-    flashcardGroup: { type: mongoose.Schema.Types.ObjectId, ref: 'FlashcardGroup' }
+    flashcardGroup: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FlashcardGroup' }]
   });
   
 

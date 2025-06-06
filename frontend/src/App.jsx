@@ -8,6 +8,10 @@ import Dashboard from './pages/Dashboard'
 import Upload from './pages/Upload.jsx'
 import Notes from './pages/Notes.jsx'
 import SummaryPage from './pages/Summery'
+import FlashcardPage from './pages/Flashcard'
+import QuizDashboard from './pages/Quiz'
+import QuizAttemptPage from './pages/QuizAttempt'
+import AnalyticsPage from './pages/Analytics'
 
 
 import { createBrowserRouter, RouterProvider } from 'react-router'
@@ -41,6 +45,25 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
     path: "/summaries",
     element: <SummaryPage />,
   }, 
+  {
+    path: "/flashcards",
+    element: <FlashcardPage />,
+  },
+
+  {
+    path: "/quizzes",
+    element: <QuizDashboard />,
+  },
+  
+  {
+    path: "/quiz/:id",
+    element: <QuizAttemptPage />,
+  },
+  
+  {
+    path: "/quiz/:id/analytics",
+    element: <AnalyticsPage />,
+  },
 ])
 function App() {
 

@@ -31,7 +31,7 @@ const SummaryPage = () => {
       .then(res => {
         if (res.data.success) setsummerySubject(res.data.data);
       }).catch(err => console.error("Subject fetch error:", err));
-  }, []);
+  }, []); 
 
 useEffect(() => {
     axios.post(`${url}/api/v1/notes/get-subjects`, {}, { withCredentials: true })
@@ -42,14 +42,20 @@ useEffect(() => {
 
   useEffect(() => {
     if (selectedSubject) {
-      axios.post(`${url}/api/v1/users/get-summaries`, { subject: selectedSubject }, { withCredentials: true })
-        .then(res => setSummaries(res.data.data))
+      axios.post(`${url}/api/v1/summery/get-summeries`, { subject: selectedSubject }, { withCredentials: true })
+        .then(res =>{ 
+          console.log(res.data.data);
+          
+          setSummaries(res.data.data)
+          console.log(summaries);
+          
+    })
         .catch(err => console.error("Summary fetch error:", err));
     }
   }, [selectedSubject]);
 
   const handleSummaryDelete = async (id) => {
-    await axios.post(`${url}/api/v1/users/delete-summary`, { summaryId: id }, { withCredentials: true });
+    await axios.post(`${url}/api/v1/summery/delete-summery`, { summaryId: id }, { withCredentials: true });
     setSummaries(prev => prev.filter(s => s._id !== id));
   };
    useEffect(() => {
@@ -65,6 +71,14 @@ useEffect(() => {
     }
   }, [formData.selectedSubject]);
   
+  const handleFolderDelete = async (subject) => {
+    await axios.post(`${url}/api/v1/summery/delete-subject`, { subject }, { withCredentials: true });
+    setsummerySubject(prev => prev.filter(s => s !== subject));
+    if (selectedSubject === subject) {
+      setSelectedSubject(null);
+      setSummaries([]);
+    }
+  }
   const handleNotesFetch = async () => {
     const subject = formData.selectedSubject
     const res = await axios.post(`${url}/api/v1/notes/get-notes`, { subject }, { withCredentials: true });
@@ -72,6 +86,44 @@ useEffect(() => {
       setNotes(res.data.data);  
     }
   }
+
+ const handleDownload = async (id) => {
+  try {
+    const response = await axios.post(
+      `${url}/api/v1/summery/download-summery-file`,
+      { summaryId: id },
+      { responseType: "blob", withCredentials: true }
+    );
+
+    // Create a blob URL and trigger download
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+
+    // Optional: dynamically name the file
+    link.download = "summary.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    // Clean up the blob URL
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error("Error downloading the file", error);
+  }
+};
+
+
+    // const file = new Blob([responce.data], { type: "application/pdf" });
+    // const fileUrl = URL.createObjectURL(file);
+    // const link = document.createElement("a");
+    // link.href = fileUrl;
+    // link.download = "summary.pdf";
+    // link.click();
+    // URL.revokeObjectURL(fileUrl);
+
+ 
 
 
   const handleUpload = async () => {
@@ -98,7 +150,7 @@ console.log(res.data);
 };
 
   const renderFolders = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ">
       {summerySubject.map((subj, i) => (
         <Card key={i} onClick={() => setSelectedSubject(subj)} className="cursor-pointer hover:shadow-md">
           <CardContent className="flex justify-between p-6 items-center">
@@ -107,7 +159,7 @@ console.log(res.data);
               <span className="font-semibold text-lg">{subj}</span>
             </div>
             <FaTrash className="text-indigo-600 cursor-pointer"
-              onClick={e => { e.stopPropagation(); handleSummaryDelete(subj); }} />
+              onClick={e => { e.stopPropagation(); handleFolderDelete(subj); }} />
           </CardContent>
         </Card>
       ))}
@@ -116,21 +168,28 @@ console.log(res.data);
 
   const renderSummaries = () => (
     <div>
-      <Button variant="ghost" onClick={() => setSelectedSubject(null)} className="mb-4 flex items-center text-indigo-600">
-        <FaArrowLeft className="mr-2" /> Back to Folders
+      <Button variant="ghost " onClick={() => {setSelectedSubject(null); setSummaries([])}} className="mb-4 flex items-center text-indigo-600 cursor-pointer">
+        <FaArrowLeft className="mr-2 " /> Back to Folders
       </Button>
 
-      <h2 className="text-2xl font-bold text-gray-700 mb-6">{selectedSubject} Summaries</h2>
+      <h2 className="text-2xl font-bold text-gray-700 mb-6 ">{selectedSubject} Summaries</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {summaries.map((file, index) => (
-          <Card key={index} className="p-4">
+          <Card key={index} className="p-4 cursor-pointer">
             <CardContent>
-              <p className="font-semibold mb-2">{file.summaryName}</p>
-              <p className="text-sm text-gray-500 mb-3">Subject: {file.subject}</p>
-              <div className="flex justify-between">
-                <a href={convertToDownloadableUrl(file.fileUrl)} download className="text-indigo-600 hover:underline flex items-center">
+              <p className="font-semibold mb-2">{file.fileName}</p>
+              <p className="text-sm text-gray-500 mb-1">Note: {file.note.fileName}</p>
+              <p className="text-sm text-gray-500 mb-3">Word: {file.wordCount}</p>
+
+
+              <div className="flex justify-between items-center">
+                <a href="#" onClick={() => handleDownload(file._id)}  className="text-indigo-600 hover:underline flex items-center">
                   <FaDownload className="mr-2" /> Download
                 </a>
+              <div className="text-sm capitalize " 
+              style={{color: file.level === "short" ? "green" : file.level === "medium" ? "orange" : "red"}}
+              > {file.level}</div>
+
                 <FaTrash onClick={() => handleSummaryDelete(file._id)} className="text-indigo-600 cursor-pointer" />
               </div>
             </CardContent>
@@ -178,7 +237,7 @@ console.log(res.data);
                 <option value="">Select Length</option>
                 <option value="short">Short(14-15% of note)</option>
                 <option value="medium">Medium(22-25% of note)</option>
-                <option value="large">Large(30-32% of note)</option>
+                <option value="long">Long(30-32% of note)</option>
 
               </select> 
               <div className="flex justify-end space-x-2">

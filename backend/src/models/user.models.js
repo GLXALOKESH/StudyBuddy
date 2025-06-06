@@ -61,6 +61,12 @@ const userSchema = mongoose.Schema(
         ref: "Note",
       },
     ],
+    flashcardGroups: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "FlashcardGroup",
+      },
+    ],
   },
   { timestamps: true }
 );
