@@ -2,7 +2,10 @@ import React from 'react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { BarChart, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid, Legend, Bar } from 'recharts';
+import {
+  BarChart, PieChart, Pie, Cell, XAxis, YAxis,
+  Tooltip, LineChart, Line, CartesianGrid, Legend, Bar
+} from 'recharts';
 
 const pieData = [
   { name: 'Correct', value: 7 },
@@ -41,20 +44,17 @@ export default function AnalyticsPage() {
         <Card>
           <CardContent className="flex flex-col md:flex-row justify-between items-center p-6">
             <div>
-              <h2 className="text-xl font-semibold">Score: <span className="text-green-600">8/10</span></h2>
+              <h2 className="text-xl font-semibold">
+                Score: <span className="text-green-600">8/10</span>
+              </h2>
               <p className="text-gray-600">Time Taken: 4m 20s</p>
               <p className="text-gray-600">Accuracy: 80%</p>
             </div>
             <div className="h-48 w-48">
               <PieChart width={200} height={200}>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  outerRadius={80}
-                  label
-                >
+                <Pie data={pieData} dataKey="value" outerRadius={80} label>
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -98,22 +98,27 @@ export default function AnalyticsPage() {
         <Card>
           <CardContent className="p-6">
             <h2 className="text-xl font-semibold mb-4">🏆 Leaderboard</h2>
-            <table className="w-full text-left">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="text-indigo-700">
+                <tr className="text-indigo-700 border-b">
                   <th className="p-2">Rank</th>
                   <th className="p-2">Name</th>
                   <th className="p-2">Score</th>
                 </tr>
               </thead>
               <tbody>
-                {leaderboard.map((user) => (
-                  <tr key={user.rank} className={user.name === 'You' ? 'bg-indigo-100' : ''}>
-                    <td className="p-2">#{user.rank}</td>
-                    <td className="p-2">{user.name}</td>
-                    <td className="p-2">{user.score}</td>
-                  </tr>
-                ))}
+                {leaderboard
+                  .sort((a, b) => a.rank - b.rank)
+                  .map((user) => (
+                    <tr
+                      key={user.rank}
+                      className={`${user.name === 'You' ? 'bg-indigo-100 font-semibold' : ''} border-b`}
+                    >
+                      <td className="p-2">{user.rank}</td>
+                      <td className="p-2">{user.name}</td>
+                      <td className="p-2">{user.score}</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </CardContent>

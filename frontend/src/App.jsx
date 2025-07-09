@@ -12,6 +12,7 @@ import FlashcardPage from './pages/Flashcard'
 import QuizDashboard from './pages/Quiz'
 import QuizAttemptPage from './pages/QuizAttempt'
 import AnalyticsPage from './pages/Analytics'
+import QuizStartPage from './pages/QuizStart'
 
 
 import { createBrowserRouter, RouterProvider } from 'react-router'
@@ -64,6 +65,12 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
     path: "/quiz/:id/analytics",
     element: <AnalyticsPage />,
   },
+  
+  {
+    path: "/quiz/start/:id",
+    element: <QuizStartPage />,
+  },
+
 ])
 function App() {
 

@@ -67,6 +67,12 @@ const userSchema = mongoose.Schema(
         ref: "FlashcardGroup",
       },
     ],
+    Quizes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Quiz",
+      },
+    ],
   },
   { timestamps: true }
 );
